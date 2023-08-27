@@ -2,11 +2,21 @@
 
 namespace Command_Music {
     internal class Program {
+        Command_Parser parser = new Command_Parser();
         Database_Object data = new Database_Object();
         List<string> musicQueue = new List<string>();
         int iter = 0;
         WaveOutEvent outputDevice = new WaveOutEvent();
         public static Task Main(string[] args) => new Program().MainAsync(args);
+
+        public void registerCommands() {
+            parser.registerCommand("volume", Lambdas.volume);
+            parser.registerAlias("volume", "vol");
+            parser.registerCommand("resume", Lambdas.resume);
+            parser.registerAlias("resume", "res");
+            parser.registerCommand("pause", Lambdas.pause);
+            parser.registerAlias("pause", "pau");
+        }
         public void queueDirectory(string directory, bool shuffle = false) {
             var filesRaw = Directory.EnumerateFiles(directory).ToList();
             for (int i = 0; i < filesRaw.Count(); i++) {
@@ -43,6 +53,7 @@ namespace Command_Music {
         }
 
         public async Task MainAsync(string[] args) {
+            registerCommands();
             Console.WriteLine("Program Started");
 
             await data.populateSelf();
@@ -53,7 +64,14 @@ namespace Command_Music {
             outputDevice.Init(new AudioFileReader((musicQueue[iter++])));
             outputDevice.Play();
             outputDevice.PlaybackStopped += Player_PlaybackFinished;
-            await Task.Delay(-1);
+
+            while (true) {
+                //Console.Clear();
+                Console.Write("<Command Music>: ");
+                parser.processInput(Console.ReadLine(), outputDevice, data);
+                Console.WriteLine();
+            }
+            //await Task.Delay(-1);
         }
 
 

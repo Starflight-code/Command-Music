@@ -25,8 +25,8 @@ namespace Command_Music {
                                     // due to the current deployment plan (closed source, internal use only)
             }
         }
-
-
-
+        public static string preProcessInput(string input) {
+            return input.ToLower().Trim();
+        }
     }
 }
